@@ -37,27 +37,44 @@ import org.jetbrains.annotations.Nullable;
 public class TravelHandler {
 
     public static boolean teleport(Level level, Player player) {
-        if (player instanceof ServerPlayer serverPlayer) {
-            Optional<Vec3> pos = teleportPosition(level, player, Config.maxDistance.get());
-            if (pos.isEmpty()) return false;
-            if (Config.shouldFireTeleportEvent.get()) pos = teleportEvent(player, pos.get());
-            if (pos.isEmpty()) {
-                player.playNotifySound(SoundEvents.DISPENSER_FAIL, SoundSource.PLAYERS, 1F, 1F);
-            } else {
-                player.teleportTo(
-                    pos.get()
-                        .x(),
-                    pos.get()
-                        .y(),
-                    pos.get()
-                        .z());
-                serverPlayer.connection.resetPosition();
-                player.fallDistance = 0;
-                player.playNotifySound(SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 1F, 1F);
+        Optional<Vec3> pos = teleportPosition(level, player,Config.maxDistance.get());
+        if (pos.isPresent()) {
+            if (player instanceof ServerPlayer serverPlayer) {
+                Optional<Vec3> eventPos = teleportEvent(player, pos.get());
+                if (eventPos.isPresent()) {
+                    player.teleportTo(eventPos.get().x(), eventPos.get().y(), eventPos.get().z());
+                    serverPlayer.connection.resetPosition();
+                    player.fallDistance = 0;
+                    player.playNotifySound(SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 1F, 1F);
+                } else {
+                    player.playNotifySound(SoundEvents.DISPENSER_FAIL, SoundSource.PLAYERS, 1F, 1F);
+                }
             }
             return true;
+        } else {
+            return false;
         }
-        return false;
+        //if (player instanceof ServerPlayer serverPlayer) {
+        //    Optional<Vec3> pos = teleportPosition(level, player, Config.maxDistance.get());
+        //    if (pos.isEmpty()) return false;
+        //    if (Config.shouldFireTeleportEvent.get()) pos = teleportEvent(player, pos.get());
+        //    if (pos.isEmpty()) {
+        //        player.playNotifySound(SoundEvents.DISPENSER_FAIL, SoundSource.PLAYERS, 1F, 1F);
+        //    } else {
+        //        player.teleportTo(
+        //            pos.get()
+        //                .x(),
+        //            pos.get()
+        //                .y(),
+        //            pos.get()
+        //                .z());
+        //        serverPlayer.connection.resetPosition();
+        //        player.fallDistance = 0;
+        //        player.playNotifySound(SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 1F, 1F);
+        //    }
+        //    return true;
+        //}
+        //return false;
     }
 
     public static Optional<Vec3> teleportPosition(Level level, Player player, int maxRange) {
