@@ -1,4 +1,4 @@
-package online.keriils.supertravelstaff.main;
+package online.keriils.supertravelstaff;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.CreativeModeTab;
@@ -17,15 +17,12 @@ import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
 
-import online.keriils.supertravelstaff.config.Config;
-import online.keriils.supertravelstaff.item.SuperTravelStaffItem;
-
 @SuppressWarnings("unused")
 @Mod(SuperTravelStaff.MODID)
 public class SuperTravelStaff {
 
     public static final String MODID = "supertravelstaff";
-    private static final Logger LOGGER = LogUtils.getLogger();
+    public static final Logger LOGGER = LogUtils.getLogger();
 
     // Deferred Register
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
