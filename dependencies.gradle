@@ -1,0 +1,51 @@
+project.dependencies {
+    implementation("org.jetbrains:annotations:26.0.2")
+    // Registrate
+    modApi("com.tterrag.registrate:Registrate:${registrate_version}")
+//    jarJar(group: 'com.tterrag.registrate', name: 'Registrate', version: "${registrate_version_range}")
+
+    // JEI
+    modCompileOnly("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}")
+    modCompileOnly("mezz.jei:jei-${minecraft_version}-forge-api:${jei_version}")
+    modRuntimeOnly("mezz.jei:jei-${minecraft_version}-common:${jei_version}")
+    modRuntimeOnly("mezz.jei:jei-${minecraft_version}-forge:${jei_version}")
+
+    modImplementation("org.moddingx:LibX:${minecraft_version}-5.0.1")
+    modImplementation("blank:TravelAnchors-${minecraft_version}:5.0.1")
+    modImplementation("com.enderio:EnderIO:${minecraft_version}-6.2.11-beta")
+    modImplementation("dev.gigaherz.graph:GraphLib3:3.0.7")
+}
+
+// Sets up a dependency configuration called 'localRuntime' and a deobfuscating one called 'modLocalRuntime'
+// These configurations should be used instead of 'runtimeOnly' to declare
+// a dependency that will be present for runtime testing but that is
+// "optional", meaning it will not be pulled by dependents of this mod.
+//project.configurations {
+//    runtimeClasspath.extendsFrom localRuntime
+//}
+
+//project.obfuscation {
+//    createRemappingConfiguration(configurations.localRuntime)
+//}
+
+
+// If you wish to declare dependencies against mods, make sure to use the 'mod*' configurations so that they're remapped.
+// See https://github.com/neoforged/ModDevGradle/blob/main/LEGACY.md#remapping-mod-dependencies for more information.
+
+// Example optional mod dependency with JEI
+// The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
+// modCompileOnly "mezz.jei:jei-${mc_version}-common-api:${jei_version}"
+// modCompileOnly "mezz.jei:jei-${mc_version}-neoforge-api:${jei_version}"
+// We add the full version to localRuntime, not runtimeOnly, so that we do not publish a dependency on it
+// modLocalRuntime "mezz.jei:jei-${mc_version}-neoforge:${jei_version}"
+
+// Example mod dependency using a mod jar from ./libs with a flat dir repository
+// This maps to ./libs/coolmod-${mc_version}-${coolmod_version}.jar
+// The group id is ignored when searching -- in this case, it is "blank"
+// modImplementation "blank:coolmod-${mc_version}:${coolmod_version}"
+
+// Example mod dependency using a file as dependency
+// modImplementation files("libs/coolmod-${mc_version}-${coolmod_version}.jar")
+
+// Example project dependency using a sister or child project:
+// modImplementation project(":myproject")

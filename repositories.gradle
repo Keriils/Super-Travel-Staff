@@ -1,0 +1,55 @@
+import java.util.function.Consumer
+
+project.repositories { RepositoryHandler handler ->
+    mavenLocal()
+
+    // Project libs
+    def collect = fileTree(dir: 'libs', include: '**/*.jar').files.collect { it.parentFile }
+    if (collect.size() != 0) flatDir { dirs collect }
+
+    // Maven Central
+    mavenCentral()
+
+    // Modrinth Maven
+    exclusiveRepo(handler, 'https://api.modrinth.com/maven', 'maven.modrinth')
+
+    // Curse Forge Maven
+    exclusiveRepo(handler, 'https://cursemaven.com', 'curse.maven')
+
+    // CF-Community Maven
+    // JEI-Mirror & AE2 & TOP
+    exclusiveRepo(handler, 'https://modmaven.dev/', 'appeng', 'mcjty.theoneprobe')
+
+    // Registrate Mod
+    exclusiveRepo(handler, 'https://maven.tterrag.com/', 'com.tterrag.registrate')
+
+    // JEI
+    exclusiveRepo(handler, 'https://maven.blamejared.com/', 'mezz.jei')
+
+    // EnderIO or Misc
+    exclusiveRepo(handler, 'https://maven.rover656.dev/releases/', 'com.enderio', 'dev.gigaherz.graph')
+
+    // LibX used for travel anchors
+    exclusiveRepo(handler, 'https://maven.moddingx.org/release', 'org.moddingx')
+}
+
+static def exclusiveRepo(RepositoryHandler handler, String url, String... groups) {
+    exclusiveRepo(handler, url) {
+        if (groups.length != 0) {
+            for (final def g in groups) {
+                it.includeGroup(g)
+            }
+        }
+    }
+}
+
+static def exclusiveRepo(RepositoryHandler handler, String url, Consumer<InclusiveRepositoryContentDescriptor> filterSetup) {
+    handler.exclusiveContent {
+        it.forRepository {
+            handler.maven {
+                setUrl(url)
+            }
+        }
+        if (filterSetup != null) it.filter { f -> filterSetup.accept(f) }
+    }
+}
