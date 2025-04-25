@@ -1,4 +1,4 @@
-package online.keriils.supertravelstaff;
+package online.keriils.supertravelstaff.item;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
@@ -12,6 +12,9 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 
 import org.jetbrains.annotations.NotNull;
+
+import online.keriils.supertravelstaff.config.CommonConfig;
+import online.keriils.supertravelstaff.handler.StsTravelHandler;
 
 @ParametersAreNonnullByDefault
 public class SuperTravelStaffItem extends Item {
@@ -41,18 +44,12 @@ public class SuperTravelStaffItem extends Item {
         return InteractionResult.FAIL;
     }
 
-    /**
-     * Perform your action
-     *
-     * @return true if it was a success and you want to consume the resources
-     */
     public boolean performAction(Level level, Player player) {
-        if (TravelHandler.teleport(level, player)) {
+        if (StsTravelHandler.teleport(level, player)) {
             player.getCooldowns()
-                .addCooldown(this, Config.coolDownTick.get());
+                .addCooldown(this, CommonConfig.coolDownTick.get());
             return true;
         }
         return false;
     }
-
 }

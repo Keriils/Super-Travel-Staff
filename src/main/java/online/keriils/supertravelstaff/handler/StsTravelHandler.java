@@ -1,4 +1,4 @@
-package online.keriils.supertravelstaff;
+package online.keriils.supertravelstaff.handler;
 
 import java.util.Optional;
 
@@ -7,7 +7,9 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
@@ -20,24 +22,32 @@ import net.minecraftforge.event.entity.EntityTeleportEvent;
 
 import org.jetbrains.annotations.Nullable;
 
+import com.enderio.base.common.handler.TravelHandler;
+
+import de.castcrafter.travelanchors.TeleportHandler;
+import online.keriils.supertravelstaff.config.CommonConfig;
+import online.keriils.supertravelstaff.config.MixinConfig;
+import online.keriils.supertravelstaff.integration.ModStatus;
+
 /**
- * Thanks to the original developers of <a href="https://github.com/castcrafter/travel_anchors">Travel Anchors</a>
- * for creating the initial implementation, and to the developers of
- * <a href="https://github.com/Team-EnderIO/EnderIO">EnderIO</a> for releasing their adaptation under the CC0 license
- * (public domain).
+ * Thanks to the original developers of <a
+ * href="https://github.com/castcrafter/travel_anchors">Travel Anchors</a> for creating the initial
+ * implementation, and to the developers of <a
+ * href="https://github.com/Team-EnderIO/EnderIO">EnderIO</a> for releasing their adaptation under
+ * the CC0 license (public domain).
  *
- * Original Project: Travel Anchors
- * License: Apache License 2.0
- * Source: <a href="https://github.com/castcrafter/travel_anchors">Travel Anchors</a>
+ * <p>
+ * Original Project: Travel Anchors License: Apache License 2.0 Source: <a
+ * href="https://github.com/castcrafter/travel_anchors">Travel Anchors</a>
  *
- * Adapted by EnderIO:
- * Class: TravelHandler
- * Source: <a href="https://github.com/Team-EnderIO/EnderIO/">EnderIO</a>
+ * <p>
+ * Adapted by EnderIO: Class: TravelHandler Source: <a
+ * href="https://github.com/Team-EnderIO/EnderIO/">EnderIO</a>
  */
-public class TravelHandler {
+public class StsTravelHandler {
 
     public static boolean teleport(Level level, Player player) {
-        Optional<Vec3> pos = teleportPosition(level, player, Config.maxDistance.get());
+        Optional<Vec3> pos = teleportPosition(level, player, CommonConfig.maxDistance.get());
         if (pos.isPresent()) {
             if (player instanceof ServerPlayer serverPlayer) {
                 Optional<Vec3> eventPos = teleportEvent(player, pos.get());
@@ -60,27 +70,32 @@ public class TravelHandler {
         } else {
             return false;
         }
-        // if (player instanceof ServerPlayer serverPlayer) {
-        // Optional<Vec3> pos = teleportPosition(level, player, Config.maxDistance.get());
-        // if (pos.isEmpty()) return false;
-        // if (Config.shouldFireTeleportEvent.get()) pos = teleportEvent(player, pos.get());
-        // if (pos.isEmpty()) {
-        // player.playNotifySound(SoundEvents.DISPENSER_FAIL, SoundSource.PLAYERS, 1F, 1F);
-        // } else {
-        // player.teleportTo(
-        // pos.get()
-        // .x(),
-        // pos.get()
-        // .y(),
-        // pos.get()
-        // .z());
-        // serverPlayer.connection.resetPosition();
-        // player.fallDistance = 0;
-        // player.playNotifySound(SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 1F, 1F);
-        // }
-        // return true;
-        // }
-        // return false;
+    }
+
+    public static boolean performAction(Player player, Level level, InteractionHand hand) {
+        Integer ticks = CommonConfig.coolDownTick.get();
+        Item item = player.getItemInHand(hand)
+            .getItem();
+        if (MixinConfig.INSTANCE.withEnderIO.value() && ModStatus.isEnderIOLoaded) {
+            if (TravelHandler.blockTeleport(level, player)) {
+                player.getCooldowns()
+                    .addCooldown(item, ticks);
+                return true;
+            }
+        }
+        if (MixinConfig.INSTANCE.withTravelAnchors.value() && ModStatus.isTravelAnchorsLoaded) {
+            BlockPos below = player.blockPosition()
+                .immutable()
+                .below();
+            for (InteractionHand value : InteractionHand.values()) {
+                if (TeleportHandler.anchorTeleport(level, player, below, value)) {
+                    player.getCooldowns()
+                        .addCooldown(item, ticks);
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public static Optional<Vec3> teleportPosition(Level level, Player player, int maxRange) {
@@ -103,7 +118,8 @@ public class TravelHandler {
         } else if (bhr.getType() == HitResult.Type.BLOCK) {
             Direction dir = bhr.getDirection();
             if (dir == Direction.UP) {
-                // teleport the player *inside* the target block, then later push them up by the block's height
+                // teleport the player *inside* the target block, then later push them up by the
+                // block's height
                 // warning: relies on the fact that isTeleportClear works with heights >= 1
                 target = bhr.getBlockPos();
             } else if (dir == Direction.DOWN) {
@@ -136,7 +152,8 @@ public class TravelHandler {
             BlockPos newTarget = BlockGetter
                 .traverseBlocks(traverseFrom, toPos, clipCtx, (traverseCtx, traversePos) -> {
                     if (!aimingUp) {
-                        // check underneath first, since that's more likely to be where the player wants to teleport
+                        // check underneath first, since that's more likely to be where
+                        // the player wants to teleport
                         BlockPos checkBelow = traversalCheck(level, traversePos.below());
                         if (checkBelow != null) {
                             return checkBelow;
@@ -179,8 +196,8 @@ public class TravelHandler {
     }
 
     /**
-     * @return Optional.empty if it can't teleport and the height where to place the player. This is so you can tp on
-     *         top of carpets up to a whole block
+     * @return Optional.empty if it can't teleport and the height where to place the player. This is
+     *         so you can tp on top of carpets up to a whole block
      */
     public static Optional<Double> isTeleportPositionClear(BlockGetter level, BlockPos target) {
         if (level.isOutsideBuildHeight(target)) {
@@ -213,5 +230,4 @@ public class TravelHandler {
         }
         return Optional.of(new Vec3(event.getTargetX(), event.getTargetY(), event.getTargetZ()));
     }
-
 }

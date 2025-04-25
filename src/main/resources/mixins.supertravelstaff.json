@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "package": "online.keriils.supertravelstaff.mixin",
+  "plugin": "online.keriils.supertravelstaff.mixin.MixinPlugin",
+  "compatibilityLevel": "JAVA_17",
+  "target": "@env(DEFAULT)",
+  "refmap": "mixins.supertravelstaff.refmap.json",
+  "minVersion": "0.8",
+  "mixins": [
+    "TravelAnchors.EventInterception_Mixin",
+    "EnderIO.StaffItemHandler_Mixin",
+    "TravelAnchors.StaffItemHandler_Mixin"
+  ],
+  "client": [],
+  "server": []
+}

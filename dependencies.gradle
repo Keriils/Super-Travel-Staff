@@ -4,6 +4,9 @@ project.dependencies {
     modApi("com.tterrag.registrate:Registrate:${registrate_version}")
 //    jarJar(group: 'com.tterrag.registrate', name: 'Registrate', version: "${registrate_version_range}")
 
+    // Mixin
+    annotationProcessor('org.spongepowered:mixin:0.8.5:processor')
+
     // JEI
     modCompileOnly("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}")
     modCompileOnly("mezz.jei:jei-${minecraft_version}-forge-api:${jei_version}")

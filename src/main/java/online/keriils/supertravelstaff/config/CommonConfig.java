@@ -1,8 +1,8 @@
-package online.keriils.supertravelstaff;
+package online.keriils.supertravelstaff.config;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 
-public class Config {
+public class CommonConfig {
 
     public static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
     public static final ForgeConfigSpec SPEC;
@@ -11,14 +11,17 @@ public class Config {
     public static ForgeConfigSpec.IntValue maxDistance;
     public static ForgeConfigSpec.IntValue coolDownTick;
 
+    private static final String CATEGORY_COMMON = "common";
+
     static {
-        shouldFireTeleportEvent = BUILDER.comment("Should fire teleport event")
+        BUILDER.push(CATEGORY_COMMON);
+        shouldFireTeleportEvent = BUILDER.comment("Whether to fire a teleport event when teleporting.")
             .define("shouldFire", true);
-        maxDistance = BUILDER.comment("The maximum distance you are allowed to teleport.")
+        maxDistance = BUILDER.comment("The maximum distance allowed for teleportation.")
             .defineInRange("maxDistance", 256, 1, Integer.MAX_VALUE);
-        coolDownTick = BUILDER.comment("Staff cool down tick")
+        coolDownTick = BUILDER.comment("The cooldown time before the staff can be used again.")
             .defineInRange("coolDownTick", 3, 1, Integer.MAX_VALUE);
+        BUILDER.pop();
         SPEC = BUILDER.build();
     }
-
 }
